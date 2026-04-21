@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>El Punto Rojo - Sistema POS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff0a0a 0%, #ff0000 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: white;
+            border-radius: 15px;
+            padding: 15px 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #D32F2F;
+        }
+
+        .logo-placeholder {
+            width: 40px;
+            height: 40px;
+            background: #D32F2F;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-btn.ventas {
+            background: #D32F2F;
+            color: white;
+        }
+
+        .nav-btn.inventario {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .nav-btn.reportes {
+            background: #2196F3;
+            color: white;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Contenedor principal */
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+        }
+
+        /* Sección de productos */
+        .productos {
+            flex: 2;
+            min-width: 300px;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .productos h1 {
+            color: #D32F2F;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .productos h2 {
+            color: #555;
+            margin-bottom: 20px;
+            font-size: 1rem;
+            font-weight: normal;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        /* Grid de productos */
+        .grid-productos {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        .grid-productos::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .grid-productos::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .grid-productos::-webkit-scrollbar-thumb {
+            background: #D32F2F;
+            border-radius: 10px;
+        }
+
+        .producto-card {
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .producto-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(211, 47, 47, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .producto-card:hover::before {
+            left: 100%;
+        }
+
+        .producto-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            border-color: #D32F2F;
+        }
+
+        .producto-card.sin-stock {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: #f5f5f5;
+        }
+
+        .producto-nombre {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .producto-precio {
+            color: #D32F2F;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .producto-stock {
+            font-size: 0.75rem;
+            color: #666;
+            padding: 3px 8px;
+            background: #eee;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .producto-stock.agotado {
+            background: #ffebee;
+            color: #f44336;
+        }
+
+        .producto-stock.bajo {
+            background: #fff3e0;
+            color: #ff9800;
+        }
+
+        /* Sección del carrito */
+        .carrito {
+            flex: 1;
+            min-width: 320px;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            max-height: 80vh;
+        }
+
+        .carrito h2 {
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .tabla-carrito-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 10px;
+            background: #f8f9fa;
+            color: #555;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 0.9rem;
+        }
+
+        .carrito-item-nombre {
+            font-weight: 500;
+        }
+
+        .carrito-item-cantidad {
+            text-align: center;
+        }
+
+        .carrito-item-subtotal {
+            text-align: right;
+            font-weight: 500;
+            color: #D32F2F;
+        }
+
+        .btn-eliminar {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            transition: all 0.2s;
+        }
+
+        .btn-eliminar:hover {
+            background: #cc0000;
+            transform: scale(1.05);
+        }
+
+        .total {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: right;
+            margin: 15px 0;
+            padding-top: 15px;
+            border-top: 2px solid #eee;
+            color: #333;
+        }
+
+        .total span {
+            color: #D32F2F;
+            font-size: 1.8rem;
+        }
+
+        .btn-pagar {
+            background: linear-gradient(135deg, #D32F2F, #B71C1C);
+            color: white;
+            border: none;
+            padding: 15px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-pagar:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(211, 47, 47, 0.4);
+        }
+
+        .btn-pagar:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Mensajes flotantes */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            animation: slideInRight 0.3s ease-out;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .toast.success {
+            background: #4CAF50;
+        }
+
+        .toast.error {
+            background: #f44336;
+        }
+
+        .toast.warning {
+            background: #ff9800;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Loading spinner */
+        .loading-spinner {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #D32F2F;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Carrito vacío */
+        .carrito-vacio {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .carrito-vacio p {
+            margin-top: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                flex-direction: column;
+            }
+            
+            .navbar {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .grid-productos {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div class="navbar">
+        <div class="logo">
+            <div><img src="./Assets/logo.png" width="30px" alt=""></div>
+            <span>El Punto Rojo</span>
+        </div>
+        <div class="nav-links">
+            <a href="/"class="nav-btn ventas">🛒 Ventas</a>
+            <a href="Inventario.html" class="nav-btn inventario">📦 Inventario</a>
+            <a href="reportes.html" class="nav-btn reportes">📊 Reportes</a>
+        </div>
+    </div>
+    <div class="container">
+        <div class="productos">
+            <div id="productosGrid" class="grid-productos">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>Cargando productos...</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Panel del carrito -->
+        <div class="carrito">
+            <h2>🛒 Carrito de Compras</h2>
+            <div class="tabla-carrito-wrapper">
+                <table id="carritoTable">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th style="width: 60px">Cant.</th>
+                            <th style="width: 80px">Subtotal</th>
+                            <th style="width: 40px"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="carritoBody"></tbody>
+                </table>
+            </div>
+            <div class="total">
+                TOTAL: $<span id="totalCarrito">0.00</span>
+            </div>
+            <button class="btn-pagar" id="btnPagar">
+                💵 Pagar e Imprimir Factura
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== VARIABLES GLOBALES ====================
+        let carrito = [];
+        let productos = [];
+        let loadingProductos = false;
+
+        // ==================== FUNCIONES DE NOTIFICACIÓN ====================
+        function mostrarNotificacion(mensaje, tipo = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${tipo}`;
+            toast.textContent = mensaje;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideInRight 0.3s ease-out reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ==================== CARGAR PRODUCTOS ====================
+        async function cargarProductos() {
+            if (loadingProductos) return;
+            loadingProductos = true;
+            
+            try {
+                const response = await fetch('/api/productos');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                productos = await response.json();
+                
+                if (!productos || productos.length === 0) {
+                    document.getElementById('productosGrid').innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #999;">
+                            📭 No hay productos disponibles
+                        </div>
+                    `;
+                } else {
+                    mostrarProductos();
+                }
+                
+            } catch (error) {
+                console.error('Error al cargar productos:', error);
+                document.getElementById('productosGrid').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #f44336;">
+                        ❌ Error al cargar productos<br>
+                        <small>${error.message}</small><br>
+                        <button onclick="cargarProductos()" style="margin-top: 15px; padding: 8px 16px; background: #D32F2F; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            🔄 Reintentar
+                        </button>
+                    </div>
+                `;
+            } finally {
+                loadingProductos = false;
+            }
+        }
+
+        // ==================== MOSTRAR PRODUCTOS ====================
+        function mostrarProductos() {
+            const grid = document.getElementById('productosGrid');
+            
+            grid.innerHTML = productos.map(p => {
+                const sinStock = p.stock <= 0;
+                const stockClass = sinStock ? 'agotado' : (p.stock <= 5 ? 'bajo' : '');
+                const cardClass = sinStock ? 'producto-card sin-stock' : 'producto-card';
+                const onclickAttr = sinStock ? '' : `onclick="agregarAlCarrito(${p.id})"`;
+                
+                return `
+                    <div class="${cardClass}" ${onclickAttr}>
+                        <div class="producto-nombre">${escapeHtml(p.nombre)}</div>
+                        <div class="producto-precio">$${p.precio.toFixed(2)}</div>
+                        <div class="producto-stock ${stockClass}">
+                            ${sinStock ? '❌ Agotado' : `📦 Stock: ${p.stock}`}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ==================== AGREGAR AL CARRITO ====================
+        window.agregarAlCarrito = function(productoId) {
+            const producto = productos.find(p => p.id === productoId);
+            
+            if (!producto) {
+                mostrarNotificacion('Producto no encontrado', 'error');
+                return;
+            }
+            
+            if (producto.stock <= 0) {
+                mostrarNotificacion(`❌ "${producto.nombre}" está agotado`, 'error');
+                return;
+            }
+            
+            const itemEnCarrito = carrito.find(i => i.id === productoId);
+            const cantidadActual = itemEnCarrito ? itemEnCarrito.cantidad : 0;
+            
+            if (cantidadActual + 1 > producto.stock) {
+                mostrarNotificacion(`⚠️ Stock insuficiente. Solo quedan ${producto.stock} unidades de "${producto.nombre}"`, 'warning');
+                return;
+            }
+            
+            if (itemEnCarrito) {
+                itemEnCarrito.cantidad++;
+            } else {
+                carrito.push({ 
+                    id: producto.id,
+                    nombre: producto.nombre, 
+                    precio: producto.precio, 
+                    stock: producto.stock,
+                    cantidad: 1 
+                });
+            }
+            
+            actualizarCarrito();
+            mostrarNotificacion(`✅ "${producto.nombre}" agregado al carrito`, 'success');
+        };
+
+        // ==================== ELIMINAR DEL CARRITO ====================
+        window.eliminarDelCarrito = function(index) {
+            const productoEliminado = carrito[index];
+            carrito.splice(index, 1);
+            actualizarCarrito();
+            mostrarNotificacion(`🗑️ "${productoEliminado.nombre}" eliminado del carrito`, 'success');
+        };
+
+        // ==================== ACTUALIZAR CARRITO ====================
+        function actualizarCarrito() {
+            const tbody = document.getElementById('carritoBody');
+            let total = 0;
+            
+            if (carrito.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="carrito-vacio">
+                            🛒
+                            <p>Carrito vacío</p>
+                        </td>
+                    </tr>
+                `;
+                document.getElementById('totalCarrito').textContent = '0.00';
+                return;
+            }
+            
+            tbody.innerHTML = carrito.map((item, index) => {
+                const subtotal = item.precio * item.cantidad;
+                total += subtotal;
+                return `
+                    <tr>
+                        <td class="carrito-item-nombre">${escapeHtml(item.nombre)}</td>
+                        <td class="carrito-item-cantidad">${item.cantidad}</td>
+                        <td class="carrito-item-subtotal">$${subtotal.toFixed(2)}</td>
+                        <td><button class="btn-eliminar" onclick="eliminarDelCarrito(${index})">✗</button></td>
+                    </tr>
+                `;
+            }).join('');
+            
+            document.getElementById('totalCarrito').textContent = total.toFixed(2);
+        }
+
+        // ==================== FINALIZAR VENTA ====================
+        async function finalizarVenta() {
+            if (carrito.length === 0) {
+                mostrarNotificacion('El carrito está vacío', 'warning');
+                return;
+            }
+            
+            // Verificar stock nuevamente antes de procesar
+            for (const item of carrito) {
+                const productoActual = productos.find(p => p.id === item.id);
+                if (!productoActual || productoActual.stock < item.cantidad) {
+                    mostrarNotificacion(`❌ Stock insuficiente para "${item.nombre}"`, 'error');
+                    return;
+                }
+            }
+            
+            const btnPagar = document.getElementById('btnPagar');
+            btnPagar.disabled = true;
+            btnPagar.textContent = '⏳ Procesando...';
+            
+            const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+            const venta = {
+                total: total,
+                items: carrito.map(item => ({ 
+                    productoId: item.id, 
+                    cantidad: item.cantidad 
+                }))
+            };
+            
+            try {
+                const response = await fetch('/api/ventas', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(venta)
+                });
+                
+                if (response.ok) {
+                    const resultado = await response.json();
+                    console.log('Venta registrada:', resultado);
+                    
+                    // Imprimir factura
+                    imprimirFactura();
+                    
+                    // Limpiar carrito
+                    const productosVendidos = [...carrito];
+                    carrito = [];
+                    actualizarCarrito();
+                    
+                    // Recargar productos para actualizar stock
+                    await cargarProductos();
+                    
+                    mostrarNotificacion(`✅ ¡Venta registrada! Total: $${total.toFixed(2)}`, 'success');
+                } else {
+                    const error = await response.text();
+                    mostrarNotificacion(`❌ Error: ${error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error en venta:', error);
+                mostrarNotificacion(`❌ Error al procesar la venta: ${error.message}`, 'error');
+            } finally {
+                btnPagar.disabled = false;
+                btnPagar.textContent = '💵 Pagar e Imprimir Factura';
+            }
+        }
+
+        // ==================== IMPRIMIR FACTURA ====================
+        function imprimirFactura() {
+            const total = document.getElementById('totalCarrito').textContent;
+            const fecha = new Date();
+            const folio = 'FOLIO-' + fecha.getTime().toString().slice(-8);
+            
+            const ventana = window.open('', '_blank');
+            ventana.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Factura - El Punto Rojo</title>
+                    <meta charset="UTF-8">
+                    <style>
+                        * { margin: 0; padding: 0; box-sizing: border-box; }
+                        body { 
+                            font-family: 'Courier New', monospace; 
+                            padding: 20px; 
+                            max-width: 350px; 
+                            margin: 0 auto;
+                            background: white;
+                        }
+                        .header { 
+                            text-align: center; 
+                            border-bottom: 2px dashed #333; 
+                            margin-bottom: 20px; 
+                            padding-bottom: 10px;
+                        }
+                        .header h2 { color: #D32F2F; margin-bottom: 5px; }
+                        .info { font-size: 0.8rem; margin: 10px 0; text-align: center; }
+                        table { width: 100%; margin: 15px 0; }
+                        td { padding: 5px 0; }
+                        .producto-nombre { font-weight: bold; }
+                        .cantidad { text-align: center; }
+                        .precio { text-align: right; }
+                        .total-section { 
+                            margin-top: 15px; 
+                            padding-top: 10px; 
+                            border-top: 1px dashed #333;
+                            text-align: right;
+                            font-size: 1.1rem;
+                            font-weight: bold;
+                        }
+                        .footer { 
+                            text-align: center; 
+                            margin-top: 30px; 
+                            font-size: 0.7rem;
+                            color: #666;
+                            border-top: 1px dashed #333;
+                            padding-top: 10px;
+                        }
+                        @media print {
+                            body { margin: 0; padding: 10px; }
+                            .no-print { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h2>☕ Cafetería El Punto Rojo</h2>
+                        <p>¡Sabor que inspira!</p>
+                    </div>
+                    <div class="info">
+                        <p>Folio: ${folio}</p>
+                        <p>Fecha: ${fecha.toLocaleDateString()}</p>
+                        <p>Hora: ${fecha.toLocaleTimeString()}</p>
+                    </div>
+                    <table>
+                        ${carrito.map(item => `
+                            <tr>
+                                <td class="producto-nombre">${escapeHtml(item.nombre)}</td>
+                                <td class="cantidad">x${item.cantidad}</td>
+                                <td class="precio">$${(item.precio * item.cantidad).toFixed(2)}</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                    <div class="total-section">
+                        TOTAL: $${total}
+                    </div>
+                    <div class="footer">
+                        <p>¡Gracias por su preferencia!</p>
+                        <p>Vuelva pronto</p>
+                        <p style="margin-top: 5px;">*** Ticket generado por sistema ***</p>
+                    </div>
+                    <div class="no-print" style="text-align: center; margin-top: 20px;">
+                        <button onclick="window.print()" style="padding: 10px 20px; margin: 5px;">🖨️ Imprimir</button>
+                        <button onclick="window.close()" style="padding: 10px 20px; margin: 5px;">✖ Cerrar</button>
+                    </div>
+                    <script>
+                        window.print();
+                        setTimeout(() => window.close(), 2000);
+                    <\/script>
+                </body>
+                </html>
+            `);
+            ventana.document.close();
+        }
+
+        // ==================== UTILIDADES ====================
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ==================== INICIALIZACIÓN ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarProductos();
+            
+            const btnPagar = document.getElementById('btnPagar');
+            if (btnPagar) {
+                btnPagar.addEventListener('click', finalizarVenta);
+            }
+        });
+
+        // Recargar productos cuando la página se vuelve visible
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                cargarProductos();
+            }
+        });
+    </script>
+</body>
+</html>

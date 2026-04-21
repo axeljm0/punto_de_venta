@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventario - El Punto Rojo</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .inventario-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: #D32F2F;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header a {
+            color: white;
+            text-decoration: none;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .header a:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .nav-btn {
+            background: #333;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .nav-btn:hover {
+            background: #555;
+        }
+        .nav-btn.active {
+            background: #D32F2F;
+        }
+        .toolbar {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .search-box {
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .btn-refresh {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .btn-refresh:hover {
+            background: #45a049;
+        }
+        .stats {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .stat-card {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        .stat-card h3 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        .stat-card p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .stat-card.total {
+            border-left: 4px solid #2196F3;
+        }
+        .stat-card.bajo {
+            border-left: 4px solid #ff9800;
+        }
+        .stat-card.agotados {
+            border-left: 4px solid #f44336;
+        }
+        table {
+            width: 100%;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        th {
+            background: #D32F2F;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        tr:hover {
+            background: #f9f9f9;
+        }
+        .stock-input {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .stock-input:focus {
+            outline: none;
+            border-color: #D32F2F;
+        }
+        .btn-actualizar {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: background 0.3s;
+        }
+        .btn-actualizar:hover {
+            background: #45a049;
+        }
+        .btn-actualizar:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .stock-bajo {
+            background: #fff3e0;
+        }
+        .stock-agotado {
+            background: #ffebee;
+        }
+        .mensaje-exito {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            animation: slideIn 0.3s ease-out;
+            z-index: 1000;
+        }
+        .mensaje-error {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #f44336;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            animation: slideIn 0.3s ease-out;
+            z-index: 1000;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: #666;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #D32F2F;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .categoria-badge {
+            background: #e0e0e0;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="inventario-container">
+        <div class="header">
+            <h1>📦 El Punto Rojo - Inventario</h1>
+            <div class="nav-buttons">
+                <a href="/" class="nav-btn">🛒 Ventas</a>
+                <a href="Inventario.html" class="nav-btn active">📦 Inventario</a>
+                <a href="reportes.html" class="nav-btn">📊 Reportes</a>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <div>
+                <input type="text" id="searchInput" class="search-box" placeholder="🔍 Buscar producto...">
+            </div>
+            <div>
+                <button onclick="cargarInventario()" class="btn-refresh">🔄 Actualizar</button>
+            </div>
+        </div>
+
+        <div class="stats" id="statsContainer">
+            <div class="stat-card total">
+                <h3 id="totalProductos">-</h3>
+                <p>Total Productos</p>
+            </div>
+            <div class="stat-card bajo">
+                <h3 id="stockBajo">-</h3>
+                <p>Stock Bajo (≤5)</p>
+            </div>
+            <div class="stat-card agotados">
+                <h3 id="agotados">-</h3>
+                <p>Productos Agotados</p>
+            </div>
+        </div>
+
+        <div id="inventarioContent">
+            <div class="loading">
+                <div class="spinner"></div>
+                Cargando inventario...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let productosGlobal = [];
+let timeoutBusqueda = null;
+
+// Función principal para cargar inventario
+async function cargarInventario() {
+    mostrarLoading(true);
+    
+    try {
+        const response = await fetch('/api/productos');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const productos = await response.json();
+        productosGlobal = productos;
+        
+        // Filtrar si hay búsqueda activa
+        const searchTerm = document.getElementById('searchInput')?.value || '';
+        const productosFiltrados = filtrarProductos(productos, searchTerm);
+        
+        mostrarInventario(productosFiltrados);
+        actualizarEstadisticas(productos);
+        
+    } catch (error) {
+        console.error('Error al cargar inventario:', error);
+        mostrarError('Error al cargar el inventario: ' + error.message);
+        document.getElementById('inventarioContent').innerHTML = `
+            <div style="text-align: center; padding: 40px; color: red;">
+                ❌ Error al cargar el inventario<br>
+                <small>${error.message}</small><br>
+                <button onclick="cargarInventario()" style="margin-top: 10px; padding: 10px 20px;">Reintentar</button>
+            </div>
+        `;
+    } finally {
+        mostrarLoading(false);
+    }
+}
+
+// Filtrar productos por búsqueda
+function filtrarProductos(productos, termino) {
+    if (!termino || termino.trim() === '') {
+        return productos;
+    }
+    
+    const busqueda = termino.toLowerCase().trim();
+    return productos.filter(p => 
+        p.nombre.toLowerCase().includes(busqueda) ||
+        (p.categoria && p.categoria.nombre && p.categoria.nombre.toLowerCase().includes(busqueda))
+    );
+}
+
+// Mostrar tabla de inventario
+function mostrarInventario(productos) {
+    const container = document.getElementById('inventarioContent');
+    
+    if (!productos || productos.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px; background: white; border-radius: 10px;">
+                📭 No se encontraron productos
+            </div>
+        `;
+        return;
+    }
+    
+    const html = `
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Producto</th>
+                    <th>Categoría</th>
+                    <th>Precio</th>
+                    <th>Stock Actual</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${productos.map(p => {
+                    const stockClass = p.stock === 0 ? 'stock-agotado' : (p.stock <= 5 ? 'stock-bajo' : '');
+                    const categoriaNombre = p.categoria?.nombre || 'Sin categoría';
+                    
+                    return `
+                        <tr class="${stockClass}" data-id="${p.id}">
+                            <td>${p.id}</td>
+                            <td><strong>${escapeHtml(p.nombre)}</strong></td>
+                            <td><span class="categoria-badge">${escapeHtml(categoriaNombre)}</span></td>
+                            <td>$${p.precio.toFixed(2)}</td>
+                            <td>
+                                <input type="number" 
+                                       id="stock-${p.id}" 
+                                       class="stock-input" 
+                                       value="${p.stock}" 
+                                       min="0"
+                                       step="1"
+                                       onchange="validarStock(${p.id}, this.value)">
+                                <span style="font-size: 0.8rem; color: ${p.stock === 0 ? 'red' : (p.stock <= 5 ? 'orange' : 'green')}">
+                                    ${p.stock === 0 ? '⚠️ Agotado' : (p.stock <= 5 ? '⚠️ Stock bajo' : '✅ Disponible')}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn-actualizar" onclick="actualizarStock(${p.id})">
+                                    💾 Actualizar
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('')}
+            </tbody>
+        </table>
+        <div style="margin-top: 20px; text-align: center; color: #666; font-size: 0.9rem;">
+            📌 Total de productos mostrados: ${productos.length}
+        </div>
+    `;
+    
+    container.innerHTML = html;
+}
+
+// Validar stock (evitar números negativos)
+function validarStock(id, valor) {
+    const input = document.getElementById(`stock-${id}`);
+    let nuevoValor = parseInt(valor);
+    
+    if (isNaN(nuevoValor) || nuevoValor < 0) {
+        nuevoValor = 0;
+        input.value = 0;
+    }
+}
+
+// Actualizar stock de un producto (ASÍNCRONO CON PERSISTENCIA)
+async function actualizarStock(id) {
+    const input = document.getElementById(`stock-${id}`);
+    const nuevoStock = parseInt(input.value);
+    
+    if (isNaN(nuevoStock) || nuevoStock < 0) {
+        mostrarError('El stock debe ser un número válido');
+        input.value = 0;
+        return;
+    }
+    
+    // Deshabilitar botón mientras se actualiza
+    const boton = event?.target || document.querySelector(`button[onclick="actualizarStock(${id})"]`);
+    if (boton) {
+        boton.disabled = true;
+        boton.textContent = '⏳ Actualizando...';
+    }
+    
+    try {
+        const response = await fetch(`/api/productos/${id}`, {
+            method: 'PUT',
+            headers: { 
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(nuevoStock)
+        });
+        
+        if (!response.ok) {
+            const error = await response.text();
+            throw new Error(error || 'Error al actualizar stock');
+        }
+        
+        const productoActualizado = await response.json();
+        
+        // Mostrar mensaje de éxito
+        mostrarExito(`✅ Stock de "${productoActualizado.nombre}" actualizado a ${nuevoStock} unidades`);
+        
+        // Recargar inventario para reflejar cambios
+        await cargarInventario();
+        
+    } catch (error) {
+        console.error('Error al actualizar stock:', error);
+        mostrarError('Error al actualizar stock: ' + error.message);
+        
+        // Recargar para mostrar el valor correcto actual
+        await cargarInventario();
+    } finally {
+        if (boton) {
+            boton.disabled = false;
+            boton.textContent = '💾 Actualizar';
+        }
+    }
+}
+
+// Actualizar estadísticas del inventario
+function actualizarEstadisticas(productos) {
+    if (!productos || productos.length === 0) {
+        document.getElementById('totalProductos').textContent = '0';
+        document.getElementById('stockBajo').textContent = '0';
+        document.getElementById('agotados').textContent = '0';
+        return;
+    }
+    
+    const total = productos.length;
+    const stockBajo = productos.filter(p => p.stock > 0 && p.stock <= 5).length;
+    const agotados = productos.filter(p => p.stock === 0).length;
+    
+    document.getElementById('totalProductos').textContent = total;
+    document.getElementById('stockBajo').textContent = stockBajo;
+    document.getElementById('agotados').textContent = agotados;
+}
+
+// Mostrar mensaje de éxito temporal
+function mostrarExito(mensaje) {
+    const div = document.createElement('div');
+    div.className = 'mensaje-exito';
+    div.textContent = mensaje;
+    document.body.appendChild(div);
+    
+    setTimeout(() => {
+        div.remove();
+    }, 3000);
+}
+
+// Mostrar mensaje de error temporal
+function mostrarError(mensaje) {
+    const div = document.createElement('div');
+    div.className = 'mensaje-error';
+    div.textContent = mensaje;
+    document.body.appendChild(div);
+    
+    setTimeout(() => {
+        div.remove();
+    }, 3000);
+}
+
+// Mostrar/ocultar loading
+function mostrarLoading(mostrar) {
+    if (!mostrar) return;
+    // El loading se maneja en cargarInventario
+}
+
+// Búsqueda con debounce
+function configurarBusqueda() {
+    const searchInput = document.getElementById('searchInput');
+    if (!searchInput) return;
+    
+    searchInput.addEventListener('input', (e) => {
+        if (timeoutBusqueda) clearTimeout(timeoutBusqueda);
+        
+        timeoutBusqueda = setTimeout(() => {
+            const termino = e.target.value;
+            const productosFiltrados = filtrarProductos(productosGlobal, termino);
+            mostrarInventario(productosFiltrados);
+        }, 300);
+    });
+}
+
+// Escapar HTML para evitar XSS
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Actualización automática cada 30 segundos (opcional)
+let intervaloAutoActualizacion = null;
+
+function iniciarAutoActualizacion() {
+    if (intervaloAutoActualizacion) clearInterval(intervaloAutoActualizacion);
+    
+    intervaloAutoActualizacion = setInterval(() => {
+        // Solo recargar si la página está visible
+        if (!document.hidden) {
+            console.log('Auto-actualizando inventario...');
+            cargarInventario();
+        }
+    }, 30000); // Cada 30 segundos
+}
+
+function detenerAutoActualizacion() {
+    if (intervaloAutoActualizacion) {
+        clearInterval(intervaloAutoActualizacion);
+        intervaloAutoActualizacion = null;
+    }
+}
+
+// Inicializar todo cuando la página carga
+document.addEventListener('DOMContentLoaded', () => {
+    cargarInventario();
+    configurarBusqueda();
+    iniciarAutoActualizacion();
+    
+    // Detener auto-actualización cuando se cierra la página
+    window.addEventListener('beforeunload', () => {
+        detenerAutoActualizacion();
+    });
+});
+
+// Recargar cuando la página se vuelve visible (después de estar en otra pestaña)
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+        cargarInventario();
+    }
+});
+    </script>
+</body>
+</html>
