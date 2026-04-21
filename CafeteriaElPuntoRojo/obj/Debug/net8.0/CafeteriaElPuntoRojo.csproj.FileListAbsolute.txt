@@ -244,6 +244,7 @@
 /home/axel/Escritorio/PuntoDeVenta/CafeteriaElPuntoRojo/obj/Debug/net8.0/CafeteriaElPuntoRojo.csproj.CoreCompileInputs.cache
 /home/axel/Escritorio/PuntoDeVenta/CafeteriaElPuntoRojo/obj/Debug/net8.0/CafeteriaElPuntoRojo.MvcApplicationPartsAssemblyInfo.cs
 /home/axel/Escritorio/PuntoDeVenta/CafeteriaElPuntoRojo/obj/Debug/net8.0/CafeteriaElPuntoRojo.MvcApplicationPartsAssemblyInfo.cache
+/home/axel/Escritorio/PuntoDeVenta/CafeteriaElPuntoRojo/obj/Debug/net8.0/CafeteriaElPuntoRojo.sourcelink.json
 /home/axel/Escritorio/PuntoDeVenta/CafeteriaElPuntoRojo/obj/Debug/net8.0/rjimswa.dswa.cache.json
 /home/axel/Escritorio/PuntoDeVenta/CafeteriaElPuntoRojo/obj/Debug/net8.0/rjsmrazor.dswa.cache.json
 /home/axel/Escritorio/PuntoDeVenta/CafeteriaElPuntoRojo/obj/Debug/net8.0/rjsmcshtml.dswa.cache.json

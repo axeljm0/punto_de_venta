@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #ff0a0a 0%, #ff0000 100%);
+            background: linear-gradient(135deg, #e0d5d5 0%, #d6cdcd 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -823,6 +823,21 @@
                 cargarProductos();
             }
         });
+
+        // Guardar carrito en localStorage
+function guardarCarrito() {
+    localStorage.setItem('carritoElPuntoRojo', JSON.stringify(carrito));
+}
+
+// Cargar carrito guardado
+function cargarCarritoGuardado() {
+    const guardado = localStorage.getItem('carritoElPuntoRojo');
+    if (guardado) {
+        carrito = JSON.parse(guardado);
+        actualizarCarrito();
+    }
+}
+cargarCarritoGuardado();
     </script>
 </body>
 </html>
