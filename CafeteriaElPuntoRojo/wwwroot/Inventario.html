@@ -496,12 +496,12 @@
 <body>
     <div class="navbar">
         <div class="logo">
-            <div class="logo-icon">☕</div>
+            <div ><img src="./Assets/logo.png" width="35px" alt=""></div>
             <span>El Punto Rojo</span>
         </div>
         <div class="nav-links">
             <a href="/" class="nav-btn ventas">🛒 Ventas</a>
-            <a href="/inventario.html" class="nav-btn inventario">📦 Inventario</a>
+            <a href="/Inventario.html" class="nav-btn inventario">📦 Inventario</a>
             <a href="/reportes.html" class="nav-btn reportes">📊 Reportes</a>
         </div>
     </div>
@@ -538,7 +538,6 @@
         </div>
     </div>
 
-    <!-- Modal para Agregar/Editar Producto -->
     <div id="productoModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -581,7 +580,6 @@
         let productosGlobal = [];
         let timeoutBusqueda = null;
 
-        // ==================== MODAL ====================
         function abrirModalAgregar() {
             document.getElementById('modalTitle').textContent = 'Agregar Producto';
             document.getElementById('productoId').value = '0';
@@ -606,7 +604,6 @@
             document.getElementById('productoModal').style.display = 'none';
         }
 
-        // ==================== NOTIFICACIONES ====================
         function mostrarNotificacion(mensaje, tipo) {
             const toast = document.createElement('div');
             toast.className = `toast ${tipo}`;
@@ -617,7 +614,6 @@
             }, 3000);
         }
 
-        // ==================== CARGAR INVENTARIO ====================
         async function cargarInventario() {
             const container = document.getElementById('inventarioContent');
             container.innerHTML = '<div class="loading"><div class="spinner"></div><p>Cargando inventario...</p></div>';
@@ -720,7 +716,6 @@
             }
         }
 
-        // ==================== AGREGAR/EDITAR PRODUCTO ====================
         function editarProducto(producto) {
             abrirModalEditar(producto);
         }
@@ -814,7 +809,6 @@
             });
         }
 
-        // ==================== UTILIDADES ====================
         function escapeHtml(text) {
             if (!text) return '';
             const div = document.createElement('div');
@@ -822,7 +816,6 @@
             return div.innerHTML;
         }
 
-        // ==================== INICIALIZAR ====================
         document.addEventListener('DOMContentLoaded', () => {
             cargarInventario();
             configurarBusqueda();
